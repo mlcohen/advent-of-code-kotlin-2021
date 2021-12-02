@@ -1,8 +1,8 @@
 package org.adventofcode
 
-class Solution {
+class DepthMeasurementIncreases {
     companion object {
-        fun solve (values: List<Int>): Int {
+        fun count (values: List<Int>): Int {
             return values.foldIndexed(0) {  idx, acc, value ->
                 when (idx) {
                     0 -> acc

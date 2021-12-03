@@ -8,4 +8,4 @@
  */
 
 rootProject.name = "advent-of-code-kotlin-2021"
-include("day01")
+include("day01", "day02")

@@ -17,4 +17,18 @@ class SubmarineTest {
         assertEquals(loc, SubmarineLocation(position = 15, depth = 10))
         assertEquals(loc.totalArea, 150)
     }
+
+    @Test fun testSubmarineAimLocation() {
+        val commands = listOf(
+            SubmarineCommand(action = SubmarineActionType.FORWARD, steps = 5),
+            SubmarineCommand(action = SubmarineActionType.DOWN, steps = 5),
+            SubmarineCommand(action = SubmarineActionType.FORWARD, steps = 8),
+            SubmarineCommand(action = SubmarineActionType.UP, steps = 3),
+            SubmarineCommand(action = SubmarineActionType.DOWN, steps = 8),
+            SubmarineCommand(action = SubmarineActionType.FORWARD, steps = 2),
+        )
+        val loc = SubmarineAimLocation().moveBy(commands)
+        assertEquals(loc, SubmarineAimLocation(position = 15, aim = 10, depth = 60))
+        assertEquals(loc.totalArea, 900)
+    }
 }

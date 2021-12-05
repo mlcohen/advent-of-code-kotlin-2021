@@ -100,7 +100,7 @@ class BingoCard(
     }
 }
 
-class BingoCardCollection {
+class BingoCardCollection : Iterable<BingoCard> {
     private val registeredbingoCards: MutableList<BingoCard> = mutableListOf()
 
     constructor(bingoCards: List<BingoCard>) {
@@ -114,11 +114,11 @@ class BingoCardCollection {
         return registeredbingoCards[index]
     }
 
-    val winningBingoCard: BingoCard?
-        get() = registeredbingoCards.find { it.isWinner }
+    val winningBingoCards: List<BingoCard>
+        get() = registeredbingoCards.filter { it.isWinner }
 
-    val hasWinningBingoCard: Boolean
-        get() = winningBingoCard != null
+    val hasWinningBingoCards: Boolean
+        get() = winningBingoCards.isNotEmpty()
 
     fun add(card: BingoCard) {
         registeredbingoCards.add(card)
@@ -126,6 +126,10 @@ class BingoCardCollection {
 
     fun mark(number: Int) {
         registeredbingoCards.forEach { it.mark(number) }
+    }
+
+    override fun iterator(): Iterator<BingoCard> {
+        return registeredbingoCards.iterator()
     }
 
 }

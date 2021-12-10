@@ -70,16 +70,6 @@ class ExpensiveMovementFuelCost {
     }
 }
 
-fun expensiveMovementFuelCost(fromPosition: Int, toPosition: Int): Int {
-    val distance = abs(fromPosition - toPosition)
-    if (distance == 0) {
-        return 0
-    }
-    val maxPosition = max(fromPosition, toPosition)
-    val minPosition = min(fromPosition, toPosition)
-    return distance + expensiveMovementFuelCost(minPosition + 1, maxPosition)
-}
-
 fun runSimpleMoveMinFuelCostSolution(input: List<Int>) {
     println("Min Fuel Cost: Simple Movement")
     val minFuel = Solution.minFuelFor(input, movementFuelCost = ::simpleMovementFuelCost)

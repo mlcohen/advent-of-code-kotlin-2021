@@ -49,9 +49,8 @@ fun HeightMap.neighbouringPointsAt(p: Point): List<Point> {
 }
 
 fun HeightMap.findLowestPoints(): List<Point> {
-    var lowestPoints = mutableListOf<Point>()
-    this.forEachIndexed { rowIdx, row ->
-        row.forEachIndexed { colIdx, focalHeight ->
+    return this.mapIndexed { rowIdx, rowData ->
+        rowData.mapIndexed { colIdx, focalHeight ->
             val focalPoint = Point(rowIdx, colIdx)
             val neighbouringPoints = neighbouringPointsAt(rowIdx, colIdx)
             val heightCount = neighbouringPoints
@@ -61,11 +60,12 @@ fun HeightMap.findLowestPoints(): List<Point> {
                 .eachCount()
             val minHeight = heightCount.keys.minOrNull()!!
             if (focalHeight == minHeight && heightCount[minHeight] == 1 ) {
-                lowestPoints += focalPoint
+                focalPoint
+            } else {
+                null
             }
-        }
-    }
-    return lowestPoints
+        }.filterNotNull()
+    }.flatten()
 }
 
 fun HeightMap.neighbouringBasinPointsAt(p: Point): List<Point> {
@@ -122,7 +122,7 @@ fun HeightMap.prettyPrintWithBasins() {
         .minByOrNull { (_, height) -> height!! }?.first
     }.toSet()
 
-    val basinChars = "12345678".toList()
+    val basinChars = "0123456789".toList()
     this.forEachIndexed { rowIdx, rowData ->
         val points = rowData.mapIndexed { colIdx, height ->
             val matchingBasin = basins
@@ -132,7 +132,7 @@ fun HeightMap.prettyPrintWithBasins() {
             if (height == 9) {
                 '.'
             } else if (Point(rowIdx, colIdx) in lowestPoints) {
-                '@'
+                '='
             } else matchingBasin?.let {
                 val (basinIdx) = matchingBasin
                 val charIdx = basinIdx.mod(basinChars.size)
@@ -176,9 +176,10 @@ fun runSolutionPart2(heightmap: HeightMap) {
 }
 
 fun main() {
-    val heightmap = HeightMapFactory.fromFile("day09/src/main/resources/puzzleInput.txt")
-//    runSolutionPart1(heightmap)
-//    println()
-//    runSolutionPart2(heightmap)
+    val heightmap = HeightMapFactory.fromFile("day09/src/main/resources/sampleInput.txt")
+    runSolutionPart1(heightmap)
+    println()
+    runSolutionPart2(heightmap)
+    println()
     heightmap.prettyPrintWithBasins()
 }

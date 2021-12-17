@@ -85,6 +85,8 @@ object IncompleteExpressionRepairer {
 }
 
 fun runSolutionPart1(expressions: List<String>) {
+    println("Day 10 Solution: Part 1 ")
+
     val evaluations = expressions.map { it to ExpressionEvaluator.evaluate(it) }
 
     evaluations
@@ -103,6 +105,8 @@ fun runSolutionPart1(expressions: List<String>) {
 }
 
 fun runSolutionPart2(expressions: List<String>) {
+    println("Day 10 Solution: Part 2 ")
+
     val evaluations = expressions.map { it to ExpressionEvaluator.evaluate(it) }
 
     val repairs = evaluations
@@ -135,6 +139,7 @@ fun runSolutionPart2(expressions: List<String>) {
 
 fun main() {
     val expressions = File("day10/src/main/resources/puzzleInput.txt").readLines()
-//    runSolutionPart1(expressions)
+    runSolutionPart1(expressions)
+    println()
     runSolutionPart2(expressions)
 }

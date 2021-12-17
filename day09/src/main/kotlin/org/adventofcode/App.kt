@@ -9,7 +9,7 @@ data class Point(val row: Int, val col: Int)
 data class Basin(val points: Set<Point>)
 
 fun Basin.contains(row: Int, col: Int): Boolean {
-    return points.contains(Point(row, col))
+    return Point(row, col) in points
 }
 
 fun <T> HeightMap.checkPoint(row: Int, col: Int, fn: ((Boolean) -> T)): T {
@@ -51,9 +51,8 @@ fun HeightMap.neighbouringPointsAt(p: Point): List<Point> {
 fun HeightMap.findLowestPoints(): List<Point> {
     var lowestPoints = mutableListOf<Point>()
     this.forEachIndexed { rowIdx, row ->
-        row.forEachIndexed { colIdx, _ ->
+        row.forEachIndexed { colIdx, focalHeight ->
             val focalPoint = Point(rowIdx, colIdx)
-            val focalHeight = this.heightAtOrNull(rowIdx, colIdx)!!
             val neighbouringPoints = neighbouringPointsAt(rowIdx, colIdx)
             val heightCount = neighbouringPoints
                 .map { it to heightAtOrNull(it)!! }
@@ -84,19 +83,16 @@ fun HeightMap.findAllBasinPointsStartingAt(
     basinPoints: Set<Point> = setOf(),
 ): Set<Point> {
     val neighbouringPoints = neighbouringBasinPointsAt(p)
-    val nextSearchablePoints = neighbouringPoints.filter { !basinPoints.contains(it) }
+    val nextSearchablePoints = neighbouringPoints.filter { it !in basinPoints }
 
     if (nextSearchablePoints.isEmpty()) {
         return basinPoints
     }
 
-    val collectedPoints = basinPoints
-        .plus(p)
-        .plus(nextSearchablePoints)
+    val collectedPoints = basinPoints + p + nextSearchablePoints
 
     return nextSearchablePoints.fold(collectedPoints) { collection, nextPoint ->
-        val result = findAllBasinPointsStartingAt(nextPoint, collection)
-        collection.plus(result)
+        collection + findAllBasinPointsStartingAt(nextPoint, collection)
     }
 }
 
@@ -135,7 +131,7 @@ fun HeightMap.prettyPrintWithBasins() {
 
             if (height == 9) {
                 '.'
-            } else if (lowestPoints.contains(Point(rowIdx, colIdx))) {
+            } else if (Point(rowIdx, colIdx) in lowestPoints) {
                 '@'
             } else matchingBasin?.let {
                 val (basinIdx) = matchingBasin
@@ -181,8 +177,8 @@ fun runSolutionPart2(heightmap: HeightMap) {
 
 fun main() {
     val heightmap = HeightMapFactory.fromFile("day09/src/main/resources/puzzleInput.txt")
-    runSolutionPart1(heightmap)
-    println()
-    runSolutionPart2(heightmap)
-//    heightmap.prettyPrintWithBasins()
+//    runSolutionPart1(heightmap)
+//    println()
+//    runSolutionPart2(heightmap)
+    heightmap.prettyPrintWithBasins()
 }

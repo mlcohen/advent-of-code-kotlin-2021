@@ -80,19 +80,19 @@ fun HeightMap.neighbouringBasinPointsAt(p: Point): List<Point> {
 
 fun HeightMap.findAllBasinPointsStartingAt(
     p: Point,
-    basinPoints: Set<Point> = setOf(),
+    markedBasinPoints: Set<Point> = setOf(),
 ): Set<Point> {
     val neighbouringPoints = neighbouringBasinPointsAt(p)
-    val nextSearchablePoints = neighbouringPoints.filter { it !in basinPoints }
+    val nextSearchablePoints = neighbouringPoints.filter { it !in markedBasinPoints }
 
     if (nextSearchablePoints.isEmpty()) {
-        return basinPoints
+        return markedBasinPoints
     }
 
-    val collectedPoints = basinPoints + p + nextSearchablePoints
+    val nextMarkedBasinPoints = markedBasinPoints + p + nextSearchablePoints
 
-    return nextSearchablePoints.fold(collectedPoints) { collection, nextPoint ->
-        collection + findAllBasinPointsStartingAt(nextPoint, collection)
+    return nextSearchablePoints.fold(nextMarkedBasinPoints) { basinPoints, nextPoint ->
+        basinPoints + findAllBasinPointsStartingAt(nextPoint, basinPoints)
     }
 }
 

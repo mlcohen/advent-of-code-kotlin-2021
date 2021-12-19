@@ -19,7 +19,7 @@ fun EnergyLevel.step(): EnergyLevel {
     }
 }
 
-fun Point.toMinimalString(): String {
+fun Point.toCompactString(): String {
     return "($row, $col)"
 }
 
@@ -39,6 +39,12 @@ fun EnergyGrid.findAllPointsNeighboring(p: Point): List<Point> {
             } else null
         }
     }.flatten().filterNotNull()
+}
+
+fun EnergyGrid.entryCount(): Int {
+    val rowCount = this.size
+    if (rowCount == 0) return 0
+    return rowCount * this[0].size
 }
 
 fun EnergyGrid.map(fn: ((Point, EnergyLevel) -> EnergyLevel)? = null): EnergyGrid {
@@ -142,7 +148,7 @@ fun Simulation.step(): SimulationStepResult {
 }
 
 fun runSoluationPart1(energyGrid: EnergyGrid, stepCount: Int = 10) {
-    println("Day 11 Solution: Part1\n")
+    println("Day 11 Solution: Part 1\n")
 
     var initSimulation = Simulation(energyGrid)
     val initStep = Triple(0, initSimulation, 0)
@@ -162,10 +168,36 @@ fun runSoluationPart1(energyGrid: EnergyGrid, stepCount: Int = 10) {
     println("Total flashes: $totalFlashes")
 }
 
+fun runSolutionPart2(energyGrid: EnergyGrid) {
+    println("Day 11 Solution: Part 2\n")
+
+    var initSimulation = Simulation(energyGrid)
+    val initStep = Triple(0, initSimulation, -1)
+
+    val stepGenerator = generateSequence(initStep) { (step, simulation, prevFlashCount) ->
+        if (prevFlashCount == simulation.grid.entryCount()) {
+            null
+        } else {
+            val result = simulation.step()
+            Triple(step + 1, result.simulation, result.flashedPoints.size)
+        }
+    }
+
+    val steps = stepGenerator.toList()
+
+    steps.forEach { (step, simulation, flashCount) ->
+        println("After step $step")
+        simulation.grid.prettyPrint()
+        println()
+    }
+}
+
+
 fun main() {
-    val energyGrid = File("day11/src/main/resources/puzzleInput.txt")
+    val energyGrid = File("day11/src/main/resources/sampleInput.txt")
         .readLines()
         .map { it.toList().map { c -> c.digitToInt() } }
 
     runSoluationPart1(energyGrid, 100)
+//    runSolutionPart2(energyGrid)
 }

@@ -103,6 +103,9 @@ object PathFinder {
         val destinationPoint = grid.lastPoint
         val initTraversalEntry = TraversalEntry()
         val traversedEntries = mutableMapOf(ORIGIN_POINT to initTraversalEntry)
+        // N.B. Probably should refactor open entries to be a priority queue to
+        // get O(logn) insert and remove versus sorting that cost O(nlogn). Makes
+        // a significant difference in performance for very large grids
         val openEntries = mutableListOf(ORIGIN_POINT to initTraversalEntry)
 
         while (openEntries.isNotEmpty()) {

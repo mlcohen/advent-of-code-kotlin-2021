@@ -24,4 +24,5 @@ include(
     "day13",
     "day14",
     "day15",
+    "day16",
 )

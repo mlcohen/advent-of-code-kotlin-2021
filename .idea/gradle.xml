@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="GradleMigrationSettings" migrationVersion="1" />
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
@@ -27,6 +28,7 @@
             <option value="$PROJECT_DIR$/day14" />
             <option value="$PROJECT_DIR$/day15" />
             <option value="$PROJECT_DIR$/day16" />
+            <option value="$PROJECT_DIR$/day17" />
           </set>
         </option>
       </GradleProjectSettings>

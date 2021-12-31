@@ -109,14 +109,24 @@ object LiteralPacketUtils {
             .toList()
     }
 
-    fun valueFrom(data: HexString, packetStartIndex: Int): UInt {
-        return digitsFrom(data, packetStartIndex).fold(0u) { sum, digit -> (sum shl 4) or digit }
+    fun valueFrom(data: HexString, packetStartIndex: Int): ULong {
+        return digitsFrom(data, packetStartIndex).fold(0uL) { sum, digit -> (sum shl 4) or digit.toULong() }
     }
 }
 
 enum class OperatorPacketLengthType(val value: Int) {
     SUBPACKETS_TOTAL_BITS(0),
     SUBPACKETS_COUNT(1),
+}
+
+enum class OperationType(val value: Int) {
+    SUM(0),
+    PRODUCT(1),
+    MINIMUM(2),
+    MAXIMUM(3),
+    GREATER_THAN(5),
+    LESS_TYPE(6),
+    EQUAL_TO(7),
 }
 
 object OperatorPacketUtils {
@@ -165,7 +175,7 @@ sealed class Packet {
         override val data: HexString,
         override val startIndex: Int = 0,
     ) : Packet() {
-        val value: UInt by lazy { LiteralPacketUtils.valueFrom(data, startIndex) }
+        val value: ULong by lazy { LiteralPacketUtils.valueFrom(data, startIndex) }
         override val size: Int by lazy {
             val body = LiteralPacketUtils.digitsFrom(data, startIndex).size * LiteralPacketUtils.BitSize.DIGIT_BODY
             val header = PacketHeaderUtils.BitSize.HEADER
@@ -183,6 +193,7 @@ sealed class Packet {
             OperatorPacketLengthType.SUBPACKETS_COUNT -> OperatorPacketUtils.subpacketsCountFrom(data, startIndex)
             OperatorPacketLengthType.SUBPACKETS_TOTAL_BITS -> OperatorPacketUtils.subpacketsTotalBitsFrom(data, startIndex)
         } }
+        val operationType: OperationType by lazy { OperationType.values().first { it.value == type } }
         override val size: Int by lazy {
             val subpacketsLengthFieldSize = when (lengthType) {
                 OperatorPacketLengthType.SUBPACKETS_COUNT -> {
@@ -229,12 +240,14 @@ fun Packet.prettyPrintTree() {
         val generalProps = listOf(
             "version" to packet.version,
             "type" to packet.type,
+            "start" to packet.startIndex,
             "size" to packet.size,
         )
         val detailedProps = when (packet) {
             is Packet.Literal -> listOf("kind" to "LITERAL", "value" to packet.value)
             is Packet.Operator -> listOf(
                 "kind" to "OPERATOR",
+                "operation type" to packet.operationType,
                 "length type" to packet.lengthType,
                 "length" to packet.length
             )
@@ -339,18 +352,85 @@ class ProcessPacketController : PacketProcessor<Packet> {
     fun process(data: HexString): Packet {
         return process(data, 0)
     }
-
 }
 
+object PacketCalculator {
+    private fun sum(packet: Packet.Operator): ULong {
+        return packet.subpackets.sumOf { calculate(it) }
+    }
 
-fun main() {
-    val data = File("day16/src/main/resources/puzzleInput.txt").readLines().first()
+    private fun product(packet: Packet.Operator): ULong {
+        return packet.subpackets.fold(1u) { total, subpacket -> total * calculate(subpacket)}
+    }
+
+    private fun minimum(packet: Packet.Operator): ULong {
+        return packet.subpackets.minOf { calculate(it) }
+    }
+
+    private fun maximum(packet: Packet.Operator): ULong {
+        return packet.subpackets.maxOf { calculate(it) }
+    }
+
+    private fun greaterThan(packet: Packet.Operator): ULong {
+        val value1 = calculate(packet.subpackets.first())
+        val value2 = calculate(packet.subpackets.last())
+        return if (value1 > value2) 1u else 0u
+    }
+
+    private fun lessThan(packet: Packet.Operator): ULong {
+        val value1 = calculate(packet.subpackets.first())
+        val value2 = calculate(packet.subpackets.last())
+        return if (value1 < value2) 1u else 0u
+    }
+
+    private fun equalTo(packet: Packet.Operator): ULong {
+        val value1 = calculate(packet.subpackets.first())
+        val value2 = calculate(packet.subpackets.last())
+        return if (value1 == value2) 1u else 0u
+    }
+
+    private fun operate(packet: Packet.Operator): ULong {
+        return when (packet.type) {
+            0 -> sum(packet)
+            1 -> product(packet)
+            2 -> minimum(packet)
+            3 -> maximum(packet)
+            5 -> greaterThan(packet)
+            6 -> lessThan(packet)
+            7 -> equalTo(packet)
+            else -> throw error("Invalid operator type ${packet.type}")
+        }
+    }
+
+    fun calculate(packet: Packet): ULong {
+        return when (packet) {
+            is Packet.Literal -> packet.value
+            is Packet.Operator -> operate(packet)
+        }
+    }
+}
+
+fun runSolutionPart1(data: HexString) {
+    println("Day 16 Solution: Part 1")
     val controller = ProcessPacketController()
     val packet = controller.process(data)
 
-    packet.prettyPrintTree()
+    // packet.prettyPrintTree()
 
     val summedVersion = packet.fold(0) { sum, packet -> sum + packet.version }
-    println()
     println("Summed version: $summedVersion")
+}
+
+fun runSolutionPart2(data: HexString) {
+    println("Day 16 Solution: Part 2")
+    val controller = ProcessPacketController()
+    val packet = controller.process(data)
+    val result = PacketCalculator.calculate(packet)
+    println("Computed value: $result")
+}
+
+fun main() {
+    val data = File("day16/src/main/resources/puzzleInput.txt").readLines().first()
+    runSolutionPart1(data)
+    runSolutionPart2(data)
 }

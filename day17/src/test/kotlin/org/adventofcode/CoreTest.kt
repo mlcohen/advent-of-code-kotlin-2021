@@ -57,37 +57,6 @@ class CoreTest {
         }
     }
 
-    @Test fun testProbePastTarget() {
-        val targetArea = TargetArea(topLeft = Point(20, -5), bottomRight = Point(30, -10))
-        listOf(
-            // before
-            Point(19, -4) to false,
-            Point(19, -5) to false,
-            Point(19, -10) to false,
-            Point(20, -4) to false,
-            Point(30, -4) to false,
-
-            // inside
-            Point(30, -10) to false,
-            Point(30, -5) to false,
-            Point(20, -10) to false,
-            Point(20, -5) to false,
-            Point(25, -7) to false,
-
-            // past
-            Point(31, -10) to true,
-            Point(31, -5) to true,
-            Point(20, -11) to true,
-            Point(30, -11) to true,
-            Point(31, -11) to true,
-            Point(19, -11) to true,
-            Point(31, -4) to true,
-        ).forEach { (p, expectedResult) ->
-            val probe = Probe(position = p)
-            assertEquals(probe.past(targetArea), expectedResult, "Expect $expectedResult for $probe")
-        }
-    }
-
     @Test fun testStationaryProbeStep() {
         val stationaryProbe = Probe()
         assertEquals(stationaryProbe.step(), Probe(Point(0, 0), Velocity(0, -1)))

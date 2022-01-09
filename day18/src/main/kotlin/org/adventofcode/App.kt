@@ -146,6 +146,37 @@ fun SnailFishNumberList.sum(): SnailFishNumber {
     return this.reduce { acc, snailFishNumber -> (acc + snailFishNumber).reduce() }
 }
 
+val SNAIL_FISH_NUMBER_ZERO: SnailFishNumber = SnailFishNumber.Pair(0, 0)
+
+fun SnailFishNumber.findMaxMagnitudePairFrom(numbers: SnailFishNumberList): Pair<SnailFishNumber, SnailFishNumber> {
+    val initState = Triple(SNAIL_FISH_NUMBER_ZERO, SNAIL_FISH_NUMBER_ZERO, SNAIL_FISH_NUMBER_ZERO)
+    val result = numbers.fold(initState) { largest, number ->
+        if (this == number) {
+            largest
+        } else {
+            val result = (this + number).reduce()
+            if (result.magnitude() > largest.first.magnitude()) {
+                Triple(result, this, number)
+            } else largest
+        }
+    }
+
+    return result.second to result.third
+}
+
+fun SnailFishNumberList.findMaxMagnitudePair(): Pair<SnailFishNumber, SnailFishNumber> {
+    val initState = Triple(SNAIL_FISH_NUMBER_ZERO, SNAIL_FISH_NUMBER_ZERO, SNAIL_FISH_NUMBER_ZERO)
+    val result = this.fold(initState) { largest, number ->
+        val result = number.findMaxMagnitudePairFrom(this)
+        val pair = (result.first + result.second).reduce()
+        if (pair.magnitude() > largest.first.magnitude()) {
+            Triple(pair, result.first, result.second)
+        } else largest
+    }
+
+    return result.second to result.third
+}
+
 object SnailFishNumberExpressionParser {
     private sealed class ParserStackEntry {
         object LeftBracket : ParserStackEntry()
@@ -223,7 +254,19 @@ fun runSolutionPart1(numbers: SnailFishNumberList) {
     println("magnitude: ${total.magnitude()}")
 }
 
+fun runSolutionPart2(numbers: SnailFishNumberList) {
+    println("Day 18 Solution: Part 2")
+    val (left, right) = numbers.findMaxMagnitudePair()
+    val total = left + right
+    println("${left.toCompactString()} +")
+    println(right.toCompactString())
+    println("= ${total.toCompactString()}")
+    println("magnitude: ${total.reduce().magnitude()}")
+}
+
 fun main() {
-    val numbers = SnailFishNumberExpressionParser.fromFile("day18/src/main/resources/puzzleInput.txt")
+    val numbers = SnailFishNumberExpressionParser.fromFile("day18/src/main/resources/sampleInput.txt")
     runSolutionPart1(numbers)
+    println()
+    runSolutionPart2(numbers)
 }
